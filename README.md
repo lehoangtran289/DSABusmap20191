@@ -5,6 +5,7 @@
 * **Dijkstra's Algorithm** to find shortest path
 
 ## APIs
+0. Find ID of a location
 1. Find location through an ID
 2. Check connection between 2 locations
 3. Adjacent locations
