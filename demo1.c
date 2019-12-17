@@ -614,7 +614,52 @@ void shortestPath(Graph g) { // using Dijkstra to find shortest path and bus sug
 		printf("\n\ntotal stops: %d\n", weight);
 	}
 } 
-/*
+
+int readRouteBus(int res[], char *bus) {
+	FILE *f = fopen("routemapid2.txt", "r");
+	if(f == NULL) {
+   	   	printf("Cant open file to read! \n");
+ 	   	return -1;
+	}
+
+	char buf[1000];
+	int ctr;
+	while(fgets(buf, 1000, f) != NULL) {
+		deleteNewLine(buf);
+		if(strcmp(buf, bus) == 0) {
+			char route[1000];
+			fgets(route, 2000, f);
+			deleteNewLine(route);
+
+			char a[200][200]; 
+	        int j = 0;
+			ctr = 0;
+	        for(int i = 0; i <= strlen(route); i++) {
+	            if(route[i] == ' ' || route[i] == '\0') {
+	    			a[ctr][j] = '\0';
+	                ctr++;
+	                j = 0;
+	        	}
+	   			else {
+       			   	a[ctr][j] = route[i];
+	              	j++;
+	        	}	
+			}
+						
+			for(int i = 0; i < ctr; i++) { //id int array of that bus
+				res[i] = atoi(a[i]);
+			}
+			int m = ctr - 2;
+			for(int i = ctr; i < 2*ctr - 1; i++) {
+				res[i] = res[m];
+				m--;
+			}
+		}
+	}
+	fclose(f);
+	return 2*ctr - 1;
+}
+
 void shortestPath2(Graph g) { // using Dijkstra to find shortest path and bus suggestions on that path
 	int check, check2;
 	char *stop1 = (char *)malloc(sizeof(char) * 1000);
@@ -626,73 +671,96 @@ void shortestPath2(Graph g) { // using Dijkstra to find shortest path and bus su
 	int s = locationToID(g, stop1);
 	int t = locationToID(g, stop2);
 
-	//printf("start id: %d -> stop id: %d\n", s, t);
-	//printf("%s, ", getVertex(g, v));
-
-	int e = 0, length, path[1000];
+	int length, path[1000];
 	int weight = Dijktra(g, s, t, path, &length);
-	int pathn[1000];
-
 	if(weight == 99999)
 		printf("\nNo path between %s and %s\n", getVertex(g, s), getVertex(g, t));
 	else {
-		char xxx[256];
 		printf("\nPaths between %s and %s: \n", getVertex(g,s), getVertex(g,t));
-		for (int i = length; i >= 0; i--) {
-			xxx = getVertex(g, path[i]);
+		for (int i = length; i >= 0; i--){
 			if(i != 0)
 				printf("%s -> ", getVertex(g, path[i]));
 			else printf("%s ", getVertex(g, path[i]));
-			pathn[e] = path[i];
-			e++;
 		}
-		printf("\n\nBus Suggestion");
+		printf("\n\nPossible bus details\n");
 
-		// for (int i = length; i >= 0; i--) {
-		// 	if(i > 0) {
-		// 		int j = i - 1;
-		// 		busSuggest(g, path[i], path[j]);
-		// 	}
-		// }
+		for (int i = length; i >= 0; i--) {
+			if(i > 0) {
+				int j = i - 1;
+				busSuggest(g, path[i], path[j]);
+			}
+		}
 
-		int top = 0;
-		int maxp = 0;
-		char *plan[50];
-		int countp = 0;
-		while(top < length - 1) {
-			for(int i = 0; i < number; i++) {
-				for(int j = 0; j < size[i] - 1; j++) {
-					int temp = top;
+		int len = 0, path2[100];
+		for (int i = length; i >= 0; i--) {
+			path2[len] = path[i];
+			//printf("%d -> ", path2[len]);
+			len++;
+		}
+		printf("\n");
+
+		int max = 0;
+		int i = 0, countp = 0;
+		char *plan[100];
+		while (i < len - 1) { //traverse each stop in path
+			//printf("Stop %d id%d %s\n", i, path2[i], getVertex(g, path2[i]));
+			max = 0;
+			JRB node1, node = jrb_find_int(g.bus, path2[i]);
+			JRB tree = make_jrb();
+			tree = jval_v(node->val);
+			
+			char arr[200][200];
+			int ctr = 0;
+			jrb_traverse(node1, tree) {
+				strcpy(arr[ctr], jval_s(node1->key)); //all bus of that stop
+				ctr++;
+			}
+
+			for(int j = 0; j < ctr; j++) { //traverse each bus 
+				int id[200]; // all id of that bus
+				int total = readRouteBus(id, arr[j]);
+
+				// printf("\nroute %s: ", arr[j], total);
+				// for(int k = 0; k < total; k++) {
+				// 	printf("%d - ", id[k]);
+				// }
+				// printf("\n");
+
+				for(int k = 0; k < total; k++) {
 					int count = 0;
-					if(arr[i][j] == pathn[temp]) {
-						while(j<size[i]-1 && arr[i][j+1] == pathn[temp+1]){
-                        	j++;
-                        	// printf("cai gi bang cai gi : %d -%d - %d\n",j+1,size[i],pathn[temp+1]);
-                        	count++;
-                        	temp++;
-                    	}
-                    	if(count>maxp){
-                    	    // printf("%s-%d\n",routeName[i],count);
-                    	    plan[countp] = strdup(routeName[i]); //routeName: ten bus
-                    	    maxp = count;
-                    	}
+					int temp = i;
+					if(id[k] == path2[temp]) {
+						//printf("find at %d: %d\n", k, path2[temp]);
+						while(k < total && id[k+1] == path2[temp+1]) {
+								k++;
+								count++;
+								temp++;
+						}
+						//printf("-> To %d: %d\n", k, id[k], path2[temp]);
+						//printf("count: %d\n\n", count);
+						if (count > max) {
+							plan[countp] = strdup(arr[j]);
+							max = count;
+						}
 					}
 				}
 			}
+			i += max;
 			countp++;
-        	top+=maxp;
-        	// printf("maxp: %d",maxp);
-        	maxp = 0;
 		}
-		printf("In ra route : \n");
-    	for(int i = 0;i<countp;i++){
-        	printf("%s->",plan[i]);
+
+		printf("\n\nBus Suggestion: \n");
+    	for(int i = 0; i < countp; i++){
+			if(plan[i] != NULL)
+       	 		printf("%s -> ", plan[i]);
+				
     	}
+		
     	printf("\n");
 
-		printf("\n\ntotal stops: %d\n", weight);
+		printf("\nTotal stops: %d\n", weight);
 	}
-} */
+} 
 
 //--------------------------------------------------------------------
 
@@ -840,7 +908,7 @@ int main() {
 					break;
 
                 case 4: 
-					shortestPath(g);
+					shortestPath2(g);
 					//sleep(5);
 					isContinue();
 					break;
