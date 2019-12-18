@@ -577,45 +577,7 @@ int Dijktra(Graph g, int s, int t, int *path, int *length ) { // length = 1
 	return distance[t];
 }
 
-void shortestPath(Graph g) { // using Dijkstra to find shortest path and bus suggestions on that path
-	int check, check2;
-	char *stop1 = (char *)malloc(sizeof(char) * 1000);
-	char *stop2 = (char *)malloc(sizeof(char) * 1000);
-
-	stop1 = inputLocation(g, stop1, 1);
-	stop2 = inputLocation(g, stop2, 2);
-
-	int s = locationToID(g, stop1);
-	int t = locationToID(g, stop2);
-
-	//printf("start id: %d -> stop id: %d\n", s, t);
-	//printf("%s, ", getVertex(g, v));
-
-	int length, path[1000];
-	int weight = Dijktra(g, s, t, path, &length);
-	if(weight == 99999)
-		printf("\nNo path between %s and %s\n", getVertex(g, s), getVertex(g, t));
-	else {
-		printf("\nPaths between %s and %s: \n", getVertex(g,s), getVertex(g,t));
-		for (int i = length; i >= 0; i--){
-			if(i != 0)
-				printf("%s -> ", getVertex(g, path[i]));
-			else printf("%s ", getVertex(g, path[i]));
-		}
-		printf("\n\nBus Suggestion");
-
-		for (int i = length; i >= 0; i--) {
-			if(i > 0) {
-				int j = i - 1;
-				busSuggest(g, path[i], path[j]);
-			}
-		}
-
-		printf("\n\ntotal stops: %d\n", weight);
-	}
-} 
-
-int readRouteBus(int res[], char *bus) {
+int readRouteBus(int res[], char *bus) { //read all stops of a bus by id
 	FILE *f = fopen("routemapid2.txt", "r");
 	if(f == NULL) {
    	   	printf("Cant open file to read! \n");
@@ -682,7 +644,7 @@ void shortestPath2(Graph g) { // using Dijkstra to find shortest path and bus su
 				printf("%s -> ", getVertex(g, path[i]));
 			else printf("%s ", getVertex(g, path[i]));
 		}
-		printf("\n\nPossible bus details\n");
+		printf("\n\nPossible bus details:");
 
 		for (int i = length; i >= 0; i--) {
 			if(i > 0) {
@@ -699,6 +661,7 @@ void shortestPath2(Graph g) { // using Dijkstra to find shortest path and bus su
 		}
 		printf("\n");
 
+		printf("\n\nBus Suggestion: \n");
 		int max = 0;
 		int i = 0, countp = 0;
 		char *plan[100];
@@ -739,22 +702,22 @@ void shortestPath2(Graph g) { // using Dijkstra to find shortest path and bus su
 						//printf("-> To %d: %d\n", k, id[k], path2[temp]);
 						//printf("count: %d\n\n", count);
 						if (count > max) {
-							plan[countp] = strdup(arr[j]);
+							//plan[countp] = strdup(arr[j]);
+							printf("Bus %s (%d stops) -> ", arr[j], count);
 							max = count;
 						}
 					}
 				}
 			}
 			i += max;
-			countp++;
+			//countp++;
 		}
 
-		printf("\n\nBus Suggestion: \n");
-    	for(int i = 0; i < countp; i++){
-			if(plan[i] != NULL)
-       	 		printf("%s -> ", plan[i]);
+    	// for(int i = 0; i < countp; i++){
+		// 	if(plan[i] != NULL)
+       	//  		printf("%s -> ", plan[i]);
 				
-    	}
+    	// }
 		
     	printf("\n");
 
@@ -766,19 +729,9 @@ void shortestPath2(Graph g) { // using Dijkstra to find shortest path and bus su
 
 void busThroughLocation(Graph g) { //All buses through a location
 	int check;
-	char stop1[1000];
+	char *stop1 = (char *)malloc(sizeof(char) * 1000);
 
-	do {
-		printf("Input location: "); getchar();
-		scanf("%[^\n]s", stop1);
-		char *s1 = (char *)malloc(sizeof(char) * 1000);
-		strcpy(s1, stop1);
-
-		check = hasVertex(g, s1);
-		if(check == 0)
-			printf("--> Invalid location! Try again\n");
-	} while (check == 0);
-
+	stop1 = inputLocation(g, stop1, 1);
 	int id = locationToID(g, stop1);
 
 	JRB node1, node2;
@@ -865,6 +818,7 @@ void showMenu() {
     printf("9. Exit\n");
 }
 
+
 int main() {
 	Graph g = createGraph();
     readfromfile(g); //addBus and addVertices by id from busmap4.txt
@@ -885,25 +839,21 @@ int main() {
 			switch(choice){
 				case 0:
 					findID(g);
-					//sleep(1.2);
 					isContinue();
 					break;
 
 				case 1: 
 					findLocationID(g);
-					//sleep(1.2);
 					isContinue();
 					break;
 
 				case 2: 
 					checkConnection(g);
-					//sleep(1.2);
 					isContinue();
 					break;
 
 				case 3: 
 					adjacentLocation(g);
-					//sleep(3);
 					isContinue();
 					break;
 
@@ -915,25 +865,21 @@ int main() {
 
 				case 5: 
 					busThroughLocation(g);
-					//sleep(2);
 					isContinue();
 					break;
 
 				case 6: 
 					busLocations(g);
-					//sleep(2);
 					isContinue();
 					break;
 
 				case 7: 
 					printMap(g);
-					//sleep(4);
 					isContinue();
 					break;
 				
 				case 8: 
 					printBus(g);
-					//sleep(4);
 					isContinue();
 					break;
 
@@ -943,8 +889,10 @@ int main() {
 
 				default:
                 	printf("Invalid task! Try again!\n\n");
+					isContinue();
                 	break;
 			}
+
 		}	while (choice != 9);
 
     dropGraph(g);
