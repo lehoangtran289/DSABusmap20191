@@ -1,8 +1,9 @@
 # CAdvanced Bus Map ver 1
 
 ## Description
-* Hanoi Bus Map using **undirected graph** (weight = 1);
+* Hanoi Bus Map using **undirected graph** (weight = 1) and **JRB library**
 * **Dijkstra's Algorithm** to find shortest path
+* **Greedy Algorithm** to generate bus suggestion from given path
 
 ## APIs
 0. Find ID of a location
