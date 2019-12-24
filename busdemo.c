@@ -660,12 +660,13 @@ void shortestPath2(Graph g) { // using Dijkstra to find shortest path and bus su
 			//printf("%d -> ", path2[len]);
 			len++;
 		}
-		printf("\n");
+		//printf("\n");
 
 		printf("\n\nBus Suggestion: \n");
 		int max = 0;
-		int i = 0, countp = 0;
+		int i = 0, countp = 0, countb = 0;
 		char *plan[100];
+		int planb[100];
 		while (i < len - 1) { //traverse each stop in path
 			//printf("Stop %d id %d - %s\n", i, path2[i], getVertex(g, path2[i]));
 			max = 0;
@@ -705,6 +706,7 @@ void shortestPath2(Graph g) { // using Dijkstra to find shortest path and bus su
 						if (count > max) {
 							//printf("Bus %s (%d stops) -> ", arr[j], count);
 							plan[countp] = strdup(arr[j]);
+							planb[countb] = count;
 							max = count;
 						}
 					}
@@ -712,15 +714,16 @@ void shortestPath2(Graph g) { // using Dijkstra to find shortest path and bus su
 			}
 			i += max;
 			countp++;
+			countb++;
 		}
 		
-    	printf("\n");
-		printf("In ra route : \n");
+    	//printf("\n");
+		//printf("In ra route : \n");
     	for(int i = 0; i<countp; i++){
-        	printf("%s ->", plan[i]);
+        	printf("%s (%d stops) -> ", plan[i], planb[i]);
     	}
 
-		printf("\nTotal stops: %d\n", weight);
+		printf("\n\nTotal stops: %d\n", weight);
 	}
 } 
 
